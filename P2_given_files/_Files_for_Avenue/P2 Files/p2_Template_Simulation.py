@@ -24,18 +24,21 @@ update_thread = repeating_timer(2, update_sim)
 # STUDENT CODE BEGINS
 #---------------------------------------------------------------------------------
 
+# program not complete - still testing, have to add a couple more functions
+
 import time
 
 def binLocation(_id):
 
     location = []
 
+    # assigns location depending on container id
     if _id == "01":
-        location = [-0.65, 0.25, 0.45]
+        location = [-0.65, 0.25, 0.4]
     elif _id == "02":
-        location = [0, -0.65, 0.45]
+        location = [0, -0.65, 0.4]
     elif _id == "03":
-        location = [0, 0.65, 0.45]
+        location = [0, 0.65, 0.4]
     elif _id == "04":
         location = [-0.45, 0.15, 0.2]
     elif _id == "05":
@@ -58,16 +61,16 @@ def control_gripper(_id, close):
 def move_end_effector(x, y, z):
         arm.move_arm(x, y, z)
 
-def main():
-    arm.spawn_cage(1)
-    arm.move_arm(0.5, 0, 0.05)
+def main(): # still testing
+    arm.spawn_cage(1) # spawn container
+    arm.move_arm(0.5, 0, 0.05) # move to pickup location
     time.sleep(2)
-    control_gripper("01", True)
-    coords = binLocation("01")
+    control_gripper("01", True) # pick up container
+    coords = binLocation("01") # get coordinates of autoclave
     time.sleep(2)
-    arm.move_arm(coords[0], coords[1], coords[2])
+    arm.move_arm(coords[0], coords[1], coords[2]) # move to autoclave location
     time.sleep(2)
-    control_gripper("01", False)
+    control_gripper("01", False) # open gripper
     #while i == 0:
         #arm.home()
         #i_d = "02"
