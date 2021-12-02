@@ -24,13 +24,10 @@ update_thread = repeating_timer(2, update_sim)
 # STUDENT CODE BEGINS
 #---------------------------------------------------------------------------------
 
-# program not complete - still testing, have to add a couple more functions
-
 import time
 import random
 
-def binLocation(_id):
-
+def binLocation(_id): # function to determine location of correct bin based on container's id
     location = []
 
     # assigns location depending on container id
@@ -49,74 +46,77 @@ def binLocation(_id):
 
     return location
 
-def control_gripper(_id, close):
-    x=0
-    while x==0: #while left arm is not bent
-        if arm.emg_left()>0.5 and arm.emg_right()>0.5: # if left arm is bent then do the following
-            time.sleep(2)
-            if _id == "01" or _id == "02" or _id == "03": # if container is small
-                if close: # to close gripper
-                    arm.control_gripper(39)
-                else :
-                    arm.control_gripper(-39)
-            elif _id == "04" or _id == "05" or _id == "06": # if container is large
-                if close: # to close gripper
-                    arm.control_gripper(25)
-                else:
-                    arm.control_gripper(-25)
-            x=1
-
-def move_end_effector(x, y, z):
-    i=0
-    while i==0: #do the following loop while right arm is not greater than 0.5 and left arm is greater than or less than 0.5
-        if arm.emg_left()<0.5 and arm.emg_right()>0.5: # if both arms are bent then the following code
-            arm.move_arm(x, y, z)
-            i=1
-
-def autoclave(boolean,_id):
-    if _id == "04" or _id == "05" or _id == "06": # if container is large:
-        x=0
-        while x==0:
-            if arm.emg_left()>0.5 and arm.emg_right()<0.5: # if left arm is bent fully only then do the following
-                if _id== "04":
-                    arm.open_red_autoclave(boolean)
-                    x=1
-                elif _id== "05":
-                    arm.open_green_autoclave(boolean)
-                    x=1
-
-                elif _id== "06":
-                    arm.open_blue_autoclave(boolean)
-                    x=1
-
-def return_pos(id_):
-    arm.home()
-    time.sleep(2)
-    arm.spawn_cage(id_) # spawn container
-
-def terminate_p():
-    arm.terminate_arm()
+def control_gripper(_id, close): # function to open or close gripper the appropriate amount depending on size of container
+    x = 0
     
-def bmain():
-    container = ["01", "02", "03", "04", "05", "06"]
-    for container_num in range(6,0,-1):
-        current_cont=random.randrange(0, container_num)
-        id_ = container[current_cont]
-        return_pos(int(id_))
-        move_end_effector(0.5, 0, 0.05) 
-        control_gripper(id_, True) # pick up container
+    while x == 0: # will keep checking position of arms until they are in the correct position
+        if arm.emg_left() > 0.5 and arm.emg_right() > 0.5: # checks if both arms are bent
+            
+            if _id == "01" or _id == "02" or _id == "03": # if container is small
+                if close: # if we want to close gripper
+                    arm.control_gripper(39)
+                else : # if we want to open gripper
+                    arm.control_gripper(-39)
+            
+            elif _id == "04" or _id == "05" or _id == "06": # if container is large
+                if close: # if we want to close gripper
+                    arm.control_gripper(25)
+                else: # if we want to open gripper
+                    arm.control_gripper(-25)
+            
+            x = 1 # to break out of loop
+
+def move_end_effector(x, y, z): # function to move end effector to coordinates that are passed in
+    i = 0
+    
+    while i == 0: # will keep checking position of arms until they are in the correct position
+        if arm.emg_left() < 0.5 and arm.emg_right() > 0.5: # if left arm is extended and right arm is bent
+            arm.move_arm(x, y, z)
+            
+            i = 1 # to break out of loop
+
+def autoclave(boolean, _id): # function to open or close appropriate autoclave drawer depending on container id
+    if _id == "04" or _id == "05" or _id == "06": # only if container is large
+        x = 0
+        
+        while x == 0:
+            if arm.emg_left() > 0.5 and arm.emg_right() < 0.5: # if left arm is bent and right arm is extended
+                # open or close corresponding autoclave drawer
+                if _id == "04":
+                    arm.open_red_autoclave(boolean)
+                elif _id == "05":
+                    arm.open_green_autoclave(boolean)
+                elif _id == "06":
+                    arm.open_blue_autoclave(boolean)
+                x = 1 # to break out of loop
+                
+def return_pos(id_): # function to reset arm
+    arm.home()
+    time.sleep(2) # adds delay so container doesn't hit arm as it moves
+    arm.spawn_cage(id_) # spawns new container
+    
+def flow(): # function to keep track of containers and call other functions in correct order
+    container = ["01", "02", "03", "04", "05", "06"] # list of container ids
+    
+    for container_num in range(6, 0, -1): # does 6 iterations, number of containers goes down by 1 each time
+        cont_index = random.randrange(0, container_num) # gets random index between 0 and the number of containers left to move
+        id_ = container[cont_index] # gets id from randomized index
+        container.remove(id_) # removes that id from the list so it doesn't get spawned again
+        
+        return_pos(int(id_)) # pass in id (as integer) so correct container gets spawned
+        
+        move_end_effector(0.5, 0, 0.05) # move to pickup location
+        control_gripper(id_, True) # close gripper
         coords = binLocation(id_) # get coordinates of autoclave
         move_end_effector(coords[0], coords[1], coords[2]) # move to autoclave location
-        autoclave(True,id_)
-        control_gripper(id_, False) #open gripper
-        autoclave(False, id_)
-        container.remove(id_)
-    terminate_p()
+        autoclave(True, id_) # open autoclave drawer
+        control_gripper(id_, False) # open gripper
+        autoclave(False, id_) # close autoclave drawer
+        
 
-def main(): # still testing
-    bmain()
-            #control_gripper(i_d)
-        #arm.move_arm(location[0], location[1], location[2])
+def main(): # main
+    flow()
+    arm.home() # return home once everything is done
 
 main()
 
