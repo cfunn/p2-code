@@ -27,9 +27,8 @@ update_thread = repeating_timer(2, update_sim)
 import time # imports the time library
 import random # imports the random library
 
-#function done by Charlotte
 def binLocation(_id): # function to determine location of correct bin based on container's id
-    location = [] # list for location created
+    location = [] # list for location
 
     # assigns location depending on container id and stores it in list "location"
     if _id == "01":
@@ -47,7 +46,6 @@ def binLocation(_id): # function to determine location of correct bin based on c
 
     return location
 
-# function done by Ajay
 def control_gripper(_id, close): # function to open or close gripper the appropriate amount depending on size of container
     x = 0
     
@@ -70,7 +68,6 @@ def control_gripper(_id, close): # function to open or close gripper the appropr
             
             x = 1 # to break out of loop
 
-# function done by Mason
 def move_end_effector(x, y, z): # function to move end effector to coordinates that are passed in
     i = 0
     
@@ -80,7 +77,6 @@ def move_end_effector(x, y, z): # function to move end effector to coordinates t
             
             i = 1 # to break out of loop
 
-# function done by Ajay and Charlotte
 def autoclave(boolean, _id): # function to open or close appropriate autoclave drawer depending on container id
     if _id == "04" or _id == "05" or _id == "06": # only if container is large
         x = 0
@@ -126,13 +122,11 @@ def autoclave(boolean, _id): # function to open or close appropriate autoclave d
                     arm.open_blue_autoclave(boolean)
                 x = 1 # to break out of loop
                 
-# function done by Mason
 def return_pos(id_): # function to reset arm
     arm.home()
     time.sleep(2) # adds delay so container doesn't hit arm as it moves
     arm.spawn_cage(id_) # spawns new container
-    
-# function done by Charlotte with edits from Ajay
+
 def flow(): # function to keep track of containers and call other functions in correct order
     container = ["01", "02", "03", "04", "05", "06"] # list of container ids
     
